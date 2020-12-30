@@ -1,4 +1,8 @@
-﻿$gitVersion = git rev-list --all --count;
+﻿$appName = "InjectGitVersion";
+$company = "Company";
+$version = "1.2.3";
+
+$gitVersion = git rev-list --all --count;
 $gitVersionText= "{0}" -f [convert]::ToInt32($gitVersion, 10);
 $branchName = git rev-parse --abbrev-ref HEAD;
 $hash = git rev-parse HEAD;
@@ -8,10 +12,13 @@ $assemblyFile = $args[0] + "\Properties\AssemblyInfo.cs";
 $templateFile = $args[0] + "\Properties\AssemblyInfo_Template.cs";
 
 $newAssemblyContent = Get-Content $templateFile |
-%{$_ -replace "{0.0.0.0}", ("1.2.3." + $gitVersionText) } |
+%{$_ -replace "{appName}", ($appName) } |
+%{$_ -replace "{company}", ($company) } |
+%{$_ -replace "{version}", ($version + "." + $gitVersionText) } |
 %{$_ -replace "{branch}", ("Branch: " + $branchName) } |
 %{$_ -replace "{hash}", ("Hash: " + $hash) } |
-%{$_ -replace "{shortHash}", ("ShortHash: " + $shortHash) }
+%{$_ -replace "{shortHash}", ("ShortHash: " + $shortHash) } |
+%{$_ -replace "{year}", (Get-Date -Format "yyyy") }
 
 If (-not (Test-Path $assemblyFile) -or ((Compare-Object (Get-Content $assemblyFile) $newAssemblyContent))) {
     echo "Injecting Git Version Info to AssemblyInfo.cs"
